@@ -1,23 +1,297 @@
-# Compiled class file
-*.class
+import java.util.Scanner;
 
-# Log file
-*.log
+public class MailroomManager {
+    private static final PackageStack s1 = new PackageStack();
+    private static final PackageStack s2 = new PackageStack();
+    private static final PackageStack s3 = new PackageStack();
+    private static final PackageStack s4 = new PackageStack();
+    private static final PackageStack s5 = new PackageStack();
+    private static final PackageStack floor = new PackageStack();
 
-# BlueJ files
-*.ctxt
+    /**
+     * This method takes in the recipient name to get the first letter of the name in order to organize the stack by name
+     * @param recipientName
+     * @return
+     */
+    private static PackageStack getStackForRecipient(String recipientName){
+        char name = recipientName.toUpperCase().charAt(0);
+        if (name >= 'A' && name <= 'G') {
+            return s1;
+        } else if (name >= 'H' && name <= 'J') {
+            return s2;
+        } else if (name >= 'K' && name <= 'M') {
+            return s3;
+        } else if (name >= 'N' && name <= 'R') {
+            return s4;
+        } else if (name >= 'S' && name <= 'Z') {
+            return s5;
+        }
+        return null;
+    }
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+    /**
+     * This method converts the given input from number to stack.
+     * @param num
+     * @return
+     */
+    private static PackageStack getStackByNumber(int num){
+        switch(num){
+            case 0:
+                return floor;
+            case 1:
+                return s1;
+            case 2:
+                return s2;
+            case 3:
+                return s3;
+            case 4:
+                return s4;
+            case 5:
+                return s5;
+            default:
+                return null;
+        }
+    }
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+    /**
+     * This method finds all packages in the wrong stack and moves them to the floor
+     * @param floor
+     * @param stack
+     */
+    private static void misplacedPackage(PackageStack floor, PackageStack stack){
+        PackageStack tempStack = new PackageStack();
+        while(!stack.isEmpty()){
+            try {
+                Package tempPackage = stack.pop();
+                if(stack == getStackForRecipient(tempPackage.getRecipient())) {
+                    tempStack.push(tempPackage);
+                }
+                else{
+                    floor.push(tempPackage);
+                }
+            } catch (EmptyStackException e) {
+                System.out.println("");
+            } catch (FullStackException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            while (!tempStack.isEmpty()) {
+                Package tempPackage = tempStack.pop();
+                stack.push(tempPackage);
+            }
+        } catch (EmptyStackException e) {
+            e.printStackTrace();
+        } catch (FullStackException e) {
+            e.printStackTrace();
+        }
+    }
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+    /**
+     * This method takes in a name and a stack to create a list of all the packages that belong to one individual
+     * @param name
+     * @param stack
+     */
+    private static void listOfPackages(String name, PackageStack stack) {
+        PackageStack tempStack = new PackageStack();
+        while (!stack.isEmpty()) {
+            try {
+                Package tempPackage = stack.pop();
+                if (tempPackage.getRecipient().equals(name)) {
+                    System.out.println(tempPackage);
+                }
+                tempStack.push(tempPackage);
+            } catch (FullStackException e) {
+                System.out.println(" ");
+            } catch (EmptyStackException e) {
+                e.printStackTrace();
+            }
+        }
+        while (!tempStack.isEmpty()) {
+            try {
+                Package tempPackage = tempStack.pop();
+                stack.push(tempPackage);
+            } catch (EmptyStackException e) {
+                System.out.println(" ");
+            } catch (FullStackException e) {
+                System.out.println(" ");
+            }
+        }
+    }
+
+    /**
+     * This method keeps track of all arrival date, throwing any packages with a date greater than 5 out.
+     * @param stack
+     * @param newDate
+     */
+    private static void arrival(PackageStack stack, int newDate){
+        PackageStack tempStack = new PackageStack();
+        while(!stack.isEmpty()){
+            try {
+                Package tempPackage = stack.pop();
+                if(tempPackage.getArrivalDate() + 5 > newDate){
+                    tempStack.push(tempPackage);
+                }
+                else{
+                    PackageStack trashStack = new PackageStack();
+                    trashStack.push(tempPackage);
+                }
+            }
+            catch (FullStackException e){
+                System.out.println("Stack is full");
+            }
+            catch (EmptyStackException e){
+                System.out.println("Stack is empty");
+            }
+        }
+        while (!tempStack.isEmpty()) {
+            try {
+                Package tempPackage = tempStack.pop();
+                stack.push(tempPackage);
+            } catch (EmptyStackException e) {
+                System.out.println(" ");
+            } catch (FullStackException e) {
+                System.out.println(" ");
+            }
+        }
+    }
+
+    /**
+     * Main method. In this method all previous methods are called and where the code gets printed.
+     * @param args
+     * @throws FullStackException
+     */
+    public static void main(String[] args) throws FullStackException {
+        int arrivalDate = 0;
+        boolean end = true;
+        Scanner scanner = new Scanner(System.in);
+        while (end) {
+            System.out.println("D) Deliver a package");
+            System.out.println("G) Get someone's package");
+            System.out.println("T) Make it tomorrow");
+            System.out.println("P) Print the stacks");
+            System.out.println("M) Move a package from one stack to another");
+            System.out.println("F) Find packages in the wrong stack and move to floor");
+            System.out.println("L) List all packages awaiting a user");
+            System.out.println("E) Empty the floor");
+            System.out.println("Q) Quit");
+            System.out.println("Please select an option");
+            String option = scanner.next();
+            if (option.equals("d") || option.equals("D")) {
+                System.out.println("Please enter the recipient name");
+                String recipientName = scanner.next();
+                System.out.println("Please enter the weight (lbs)");
+                double weight = scanner.nextDouble();
+                Package newPackage = new Package(recipientName, arrivalDate, weight);
+                getStackForRecipient(recipientName).push(newPackage);
+                arrivalDate++;
+                if(s1.isFull())
+                    s2.push(newPackage);
+                if(s2.isFull())
+                    s3.push(newPackage);
+                if(s3.isFull())
+                    s4.push(newPackage);
+                if(s4.isFull())
+                    s5.push(newPackage);
+                if(s5.isFull())
+                    System.out.println("The stacks are all full");
+            }
+            else if (option.equals("g") || option.equals("G")) {
+                System.out.println("Please enter recipient name: ");
+                String recipientName = scanner.next();
+                PackageStack recipientPosition = getStackForRecipient(recipientName);
+                boolean desiredPackage = false;
+                int counter = 0;
+                while (!desiredPackage) {
+                    try {
+                        Package popped = recipientPosition.pop();
+                        if (popped.getRecipient().equalsIgnoreCase(recipientName)) {
+                            System.out.println(recipientName + "'s Package which weighs " + popped.getWeight() + " has been delivered.");
+                            desiredPackage = true;
+                        } else {
+                            floor.push(popped);
+                            counter++;
+                        }
+                    } catch (EmptyStackException e) {
+                        System.out.println(recipientName + " does not have any packages.");
+                        break;
+                    }
+                }
+                while (counter > 0) {
+                    try {
+                        recipientPosition.push(floor.pop());
+                        counter--;
+                    } catch (EmptyStackException e) {
+                        System.out.println("This should never happen.");
+                        break;
+                    }
+                }
+            }
+            else if (option.equals("t") || option.equals("T")) {
+                arrivalDate++;
+                System.out.println("It is now day " + arrivalDate);
+                arrival(s1, arrivalDate);
+                arrival(s2, arrivalDate);
+                arrival(s3, arrivalDate);
+                arrival(s4, arrivalDate);
+                arrival(s5, arrivalDate);
+                arrival(floor, arrivalDate);
+            }
+            else if (option.equals("p") || option.equals("P")) {
+                System.out.println("Finished Stacks\n-----------------\nStack 1:" + s1.toString());
+                System.out.println("Stack 2:" + s2.toString());
+                System.out.println("Stack 3:" + s3.toString());
+                System.out.println("Stack 4:" + s4.toString());
+                System.out.println("Stack 5:" + s5.toString());
+                System.out.println("Stack Floor:" + floor.toString());
+            }
+            else if (option.equals("m") || option.equals("M")) {
+                System.out.println("Please enter a source stack: (Enter 0 for Floor)");
+                int source = scanner.nextInt();
+                System.out.println("Please enter a destination stack: ");
+                int destination = scanner.nextInt();
+                Package temp;
+                try {
+                    temp = getStackByNumber(source).pop();
+                    getStackByNumber(destination).push(temp);
+                } catch (EmptyStackException e) {
+                    System.out.println("Source is an empty stack.");
+                }catch (FullStackException e){
+                    System.out.println("Destination stack is a full stack.");
+                }
+            }
+            else if (option.equalsIgnoreCase("f")) {
+                misplacedPackage(floor, s1);
+                misplacedPackage(floor, s2);
+                misplacedPackage(floor, s3);
+                misplacedPackage(floor, s4);
+                misplacedPackage(floor, s5);
+                System.out.println("All misplaced stacks have been moved to the floor.");
+            }
+            else if (option.equals("l") || option.equals("L")) {
+                System.out.println("Please enter Recipient name: ");
+                String recipientName = scanner.next();
+                listOfPackages(recipientName, s1);
+                listOfPackages(recipientName, s2);
+                listOfPackages(recipientName, s3);
+                listOfPackages(recipientName, s4);
+                listOfPackages(recipientName, s5);
+                listOfPackages(recipientName, floor);
+            }
+            else if (option.equals("e") || option.equals("E")) {
+                while(!floor.isEmpty()){
+                    try {
+                        floor.pop();
+                    } catch (EmptyStackException e) {
+                        System.out.println(" ");
+                    }
+                }
+                System.out.println("The floor has been emptied out.");
+            }
+            else if (option.equals("q") || option.equals("Q")) {
+                end = false;
+                System.out.println("Use Amazon Locker next time.\n");
+            }
+        }
+    }
+}

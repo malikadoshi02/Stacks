@@ -1,77 +1,96 @@
-public class Package {
-    private String recipient;
-    private int arrivalDate = 0;
-    private double weight;
+import java.util.ArrayList;
+import java.util.Stack;
+
+public class PackageStack {
+    private final int CAPACITY = 7;
+    private Stack<Package> stackOfPackages = new Stack();
+    private Package stackFinal;
+    int counter=0;
 
     /**
-     * takes in the recipient, arrival, and weight of all packages
-     * @param recipient
-     * @param arrivalDate
-     * @param weight
+     * pushes a package on to a stack
+     * @param x
+     * @throws FullStackException
      */
-    public Package(String recipient, int arrivalDate, double weight) {
-        this.recipient =recipient;
-        this.arrivalDate =arrivalDate;
-        this.weight =weight;
+    public void push(Package x) throws FullStackException {
+        if (stackOfPackages.equals(CAPACITY)) {
+            throw new FullStackException();
+        } else {
+            stackOfPackages.push(x);
+            counter++;
+        }
     }
-    public Package() {
-
-        }
 
     /**
-     * gets the recipient name
+     * removes a package from a stack
      * @return
+     * @throws EmptyStackException
      */
-        public String getRecipient () {
-            return recipient;
+    public Package pop() throws EmptyStackException {
+        if (stackOfPackages.empty()) {
+            throw new EmptyStackException();
+        } else {
+            counter--;
+            return stackOfPackages.pop();
         }
-
-    /**
-     * sets the recipient name
-     * @param recipient
-     */
-        public void setRecipient (String recipient){
-            this.recipient = recipient;
-        }
-
-    /**
-     * gets the arrival date
-     * @return
-     */
-        public int getArrivalDate () {
-            return arrivalDate;
-        }
-
-    /**
-     * sets the arrival date
-     * @param arrivalDate
-     */
-        public void setArrivalDate ( int arrivalDate){
-            this.arrivalDate = arrivalDate;
-        }
-
-    /**
-     * gets the weight
-     * @return
-     */
-        public double getWeight () {
-            return weight;
-        }
-
-    /**
-     * sets the weight
-     * @param weight
-     */
-        public void setWeight ( double weight){
-            this.weight = weight;
-        }
-
-    /**
-     * to string method for print statements
-     * @return
-     */
-    public String toString () {
-            return getRecipient() + " " + getArrivalDate() + " " + getWeight() + " ";
-        }
-
     }
+
+    /**
+     * allows the user to see the first element on the stack
+     * @return
+     * @throws EmptyStackException
+     */
+    public Package peek() throws EmptyStackException {
+        if (stackOfPackages.empty()) {
+            throw new EmptyStackException();
+        } else {
+            stackOfPackages.peek();
+        }
+        return peek();
+    }
+
+    /**
+     * keeps track if the stack if full
+     * @return
+     */
+    public boolean isFull() {
+        if (counter == CAPACITY) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * checks if the stack is empty
+     * @return
+     */
+    public boolean isEmpty() {
+        if (counter==0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * to string method for printing
+     * @return
+     */
+    public String toString() {
+
+        String retVal = "";
+        ArrayList<Package> store = new ArrayList<Package>();
+        while (!stackOfPackages.isEmpty()) {
+            Package temp =  stackOfPackages.pop();
+
+            retVal += " [" + temp.getRecipient() + "] arrival date:" + temp.getArrivalDate() +
+                    " weight: " + temp.getWeight();
+            store.add(temp);
+        }
+        for(int i=0;i<store.size();i++){
+            stackOfPackages.push(store.get(i));
+        }
+        return retVal;
+    }
+}

@@ -1,8 +1,8 @@
-public class EmptyStackException extends Throwable{
+public class FullStackException extends Throwable{
     /**
-     * exception thrown if the stack is empty
+     * exception thrown if the stack if full.
      */
-    public EmptyStackException(){
+    public FullStackException(){
         super();
     }
 }
